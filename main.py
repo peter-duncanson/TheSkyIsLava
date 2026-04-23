@@ -6,10 +6,11 @@ steelBlockImagePath = "assets/steelBlock.png"
 tarImagePath = "assets/tar.png"
 rockImagePath = "assets/rock.png"
 font = "iosevkanerdfont"
-
+keydownmoveleft = 0
+keydownmoveright = 0
 
 player = {
-    "row": 15,
+    "row": 12,
     "col": 8,
     "lives": 3,
     "score": 0
@@ -54,17 +55,30 @@ def initGame():
 
     tilemap.loadMap(areaTileArray)
 
-def updateGame(dt):
+def updateGame(dt, tracktime):
     global player
-
+    global keydownmoveleft
+    global keydownmoveright
+    
     getinput.update()
     targetRow = player["row"]
     targetCol = player["col"]
 
-    if getinput.justPressed("left") and player["col"] != 0: targetCol -= 1
-    if getinput.justPressed("right") and player["col"] != 15: targetCol += 1
+    if getinput.justPressed("left") or keydownmoveleft == 5:
+        targetCol -= 1
+        keydownmoveleft = 0
+    if getinput.justPressed("right") or keydownmoveright == 5: 
+        targetCol += 1
+        keydownmoveright = 0
+    elif getinput.keyDown("left"):
+        keydownmoveleft += 1 
+    elif getinput.keyDown("right"):
+        keydownmoveright += 1
 
-    # targetTile = tilemap.getTile(targetRow, targetCol)
+    if targetCol < 0:
+        targetCol = 15
+    elif targetCol > 15:
+        targetCol = 0
 
     player["row"] = targetRow
     player["col"] = targetCol
@@ -72,9 +86,12 @@ def updateGame(dt):
     if tilemap.isDangerous(player["row"], player["col"]):
         player["lives"] -= 1
 
+    print(dt)
+    print(tracktime)
+
 def draw(screen):
     graphics.drawTilemap(screen, tilemap._currentMap, areaKey)
-
+    graphics.drawImage(screen, "background", 0, 0)
     graphics.drawImage(screen, "tree", player["row"], player["col"])
 
 if __name__ == "__main__":
